@@ -59,7 +59,32 @@ ORDER BY cn.region_id
 ## SQL Code
 
 ```sql
+WITH node_duration AS 
+(
+SELECT customer_id,node_id,start_date,end_date, (end_date - start_date) as duration
+from 
+customer_nodes
+WHERE EXTRACT(YEAR FROM end_date) !=9999
+),
+
+
+-- CTE to check the next nodes
+nd2 AS (
+  
+SELECT customer_id,node_id,duration,
+LEAD(node_id) OVER(PARTITION BY customer_id ORDER BY start_date) as next_node_id 
+FROM node_duration
+)
+
+-- In this statement we are filtering all the rows where there is reallocation from one node to another then calculating the average
+SELECT 
+    ROUND(AVG(duration), 2) AS average_days_until_reallocation
+FROM nd2
+WHERE 
+node_id != next_node_id and next_node_id IS NOT NULL
+
 ```
+<img width="476" height="160" alt="image" src="https://github.com/user-attachments/assets/a8e461cf-4b66-4e22-8a85-c763de315443" />
 
 ---
 
