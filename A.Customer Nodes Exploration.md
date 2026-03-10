@@ -59,6 +59,8 @@ ORDER BY cn.region_id
 ## SQL Code
 
 ```sql
+
+-- in this cte we are filtering all the rows where the end_date year is not equal to 9999  (there's about 500  rows )
 WITH node_duration AS 
 (
 SELECT customer_id,node_id,start_date,end_date, (end_date - start_date) as duration
@@ -68,7 +70,7 @@ WHERE EXTRACT(YEAR FROM end_date) !=9999
 ),
 
 
--- CTE to check the next nodes
+-- In this cte we are checking next node id 
 nd2 AS (
   
 SELECT customer_id,node_id,duration,
