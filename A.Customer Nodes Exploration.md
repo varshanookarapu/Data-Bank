@@ -94,9 +94,41 @@ node_id != next_node_id and next_node_id IS NOT NULL
 
 ---
 
-## SQL Code
+## SQL Code - WIP
 
 ```sql
+
+WITH node_duration AS 
+(
+SELECT customer_id,cn.region_id,region_name,node_id,start_date,end_date, (end_date - start_date) as duration
+from 
+customer_nodes cn LEFT JOIN regions r ON
+cn.region_id=r.region_id
+WHERE EXTRACT(YEAR FROM end_date) !=9999
+),
+
+
+
+-- -- CTE to check the next nodes
+nd2 AS (
+  
+SELECT region_name,node_id,duration,
+LEAD(node_id) OVER(PARTITION BY customer_id ORDER BY start_date) as next_node_id 
+FROM node_duration
+)
+
+
+SELECT 
+    region_name,
+    PERCENTILE_CONT(0.5)  WITHIN GROUP (ORDER BY duration) AS median_days,
+    PERCENTILE_CONT(0.8)  WITHIN GROUP (ORDER BY duration) AS percentile_80,
+    PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY duration) AS percentile_95
+FROM nd2
+WHERE next_node_id IS NOT NULL
+  AND node_id != next_node_id
+GROUP BY region_name
+ORDER BY region_name;
+
 ```
 
 ---
