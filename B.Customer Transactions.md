@@ -8,6 +8,33 @@ ORDER BY txn_type
 ```
 <img width="1565" height="213" alt="image" src="https://github.com/user-attachments/assets/c4c5260c-e2af-4014-87da-6ae07a1e6588" />
 
+---
+
+**Question 2:** What is the average total historical deposit counts and  average amounts for all customers
+```sql
+WITH customer_deposits AS 
+(
+SELECT customer_id, COUNT(txn_type) AS deposit_count, SUM (txn_amount) as deposit_amount
+FROM customer_transactions
+WHERE txn_type = 'deposit'
+GROUP BY customer_id
+)
+
+SELECT  ROUND(AVG(deposit_count)) as average_deposit_Count , ROUND(AVG(deposit_amount)) as avg_deposit_amount FROM customer_deposits
+```
+<img width="1492" height="155" alt="image" src="https://github.com/user-attachments/assets/069107a3-b8b6-4e5a-a48d-c8a0801b6f8a" />
+
+---
+
+**Question 3:** For each month - how many Data Bank customers make more than 1 deposit and either 1 purchase or 1 withdrawal in a single month?
+
+```sql
+```
+
+---
+
+
+**Question 4:** What is the closing balance for each customer at the end of the month? 
 
 ```sql
 WITH deposit AS(
