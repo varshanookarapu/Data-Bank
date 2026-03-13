@@ -50,6 +50,3 @@ customer_accounting_details
 WHERE customer_id=1
 GROUP BY customer_id,end_of_month
 ```
-customer_accounting_details
-WHERE customer_id=1
-``GROUP BY customer_id,end_of_month
