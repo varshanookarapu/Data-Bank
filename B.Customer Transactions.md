@@ -29,7 +29,25 @@ SELECT  ROUND(AVG(deposit_count)) as average_deposit_Count , ROUND(AVG(deposit_a
 **Question 3:** For each month - how many Data Bank customers make more than 1 deposit and either 1 purchase or 1 withdrawal in a single month?
 
 ```sql
+WITH customer_activity_counts AS ( 
+SELECT customer_id, EXTRACT(MONTH from txn_date) as month,
+     COUNT (CASE WHEN txn_type='deposit' THEN 1 END ) AS deposit_count,
+     COUNT (CASE WHEN txn_type='purchase' THEN 1 END ) AS purchase_count,
+     COUNT (CASE WHEN txn_type='withdrawal' THEN 1 END ) AS withdrawal_count
+FROM customer_transactions
+GROUP BY customer_id ,EXTRACT(MONTH from txn_date) 
+ORDER BY customer_id ,EXTRACT(MONTH from txn_date) 
+)
+
+
+SELECT month, COUNT(customer_id) FROM customer_activity_counts 
+WHERE deposit_count > 1 AND ( purchase_count >= 1  OR withdrawal_count >=1  )   -- the condition is they make more than 1 deposit and  atleast 1 purchase or one withdrwal
+GROUP BY month 
+ORDER BY month
+  
 ```
+
+<img width="961" height="317" alt="image" src="https://github.com/user-attachments/assets/b92d4f94-3c4d-474b-be4a-44925bb3f9d2" />
 
 ---
 
