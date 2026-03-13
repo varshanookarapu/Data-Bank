@@ -30,24 +30,24 @@ SELECT  ROUND(AVG(deposit_count)) as average_deposit_Count , ROUND(AVG(deposit_a
 
 ```sql
 WITH customer_activity_counts AS ( 
-SELECT customer_id, EXTRACT(MONTH from txn_date) as month,
+SELECT customer_id, EXTRACT(MONTH from txn_date) as month,to_char(txn_date,'month') as month_name,
      COUNT (CASE WHEN txn_type='deposit' THEN 1 END ) AS deposit_count,
      COUNT (CASE WHEN txn_type='purchase' THEN 1 END ) AS purchase_count,
      COUNT (CASE WHEN txn_type='withdrawal' THEN 1 END ) AS withdrawal_count
 FROM customer_transactions
-GROUP BY customer_id ,EXTRACT(MONTH from txn_date) 
-ORDER BY customer_id ,EXTRACT(MONTH from txn_date) 
+GROUP BY customer_id ,EXTRACT(MONTH from txn_date) , to_char(txn_date,'month')
+ORDER BY customer_id ,EXTRACT(MONTH from txn_date) , to_char(txn_date,'month')
 )
 
 
-SELECT month, COUNT(customer_id) FROM customer_activity_counts 
-WHERE deposit_count > 1 AND ( purchase_count >= 1  OR withdrawal_count >=1  )   -- the condition is they make more than 1 deposit and  atleast 1 purchase or one withdrwal
-GROUP BY month 
+SELECT month,month_name, COUNT(customer_id) FROM customer_activity_counts 
+WHERE deposit_count > 1 AND ( purchase_count >= 1  OR withdrawal_count >=1   )
+GROUP BY month ,month_name
 ORDER BY month
-  
 ```
 
-<img width="961" height="317" alt="image" src="https://github.com/user-attachments/assets/b92d4f94-3c4d-474b-be4a-44925bb3f9d2" />
+<img width="1669" height="318" alt="image" src="https://github.com/user-attachments/assets/7f441706-792b-4f1e-9552-b09b8e8ee67a" />
+
 
 ---
 
