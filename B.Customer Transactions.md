@@ -78,7 +78,9 @@ FROM customer_amounts
 
 SELECT customer_id, (date_trunc('month',txn_date) + INTERVAL '1 month - 1 day ' ) :: DATE as end_of_month, SUM(total_deposit-total_purchase-total_withdrawal) AS closing_balance
 FROM customer_amounts_2
-WHERE customer_id IN ( 1,2,3)
+WHERE customer_id IN ( 1,2,3,4,5) -- added where clause to filter a few specific rows , remove the where clause to show the detials for all 500 customers
 GROUP BY customer_id,(date_trunc('month',txn_date) + INTERVAL '1 month - 1 day ' ) :: DATE 
 ORDER BY customer_id
 ```
+<img width="1663" height="702" alt="image" src="https://github.com/user-attachments/assets/107e077b-2f18-484a-9a4d-c6a16dc68a7b" />
+
