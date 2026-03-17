@@ -55,43 +55,30 @@ ORDER BY month
 **Question 4:** What is the closing balance for each customer at the end of the month? 
 
 ```sql
-WITH deposit AS(
-SELECT customer_id,
-(date_trunc('month',txn_date) + INTERVAL '1 month - 1 day' ) :: DATE as end_of_month,
-SUM(txn_amount) as total_deposit FROM customer_transactions
-WHERE txn_type='deposit'
-GROUP BY customer_id ,txn_date
+WITH customer_amounts AS
+(
+SELECT customer_id, txn_date,   
+SUM (CASE WHEN txn_type = 'deposit' THEN txn_amount END ) as total_deposit,
+SUM (CASE WHEN txn_type = 'withdrawal' THEN txn_amount END ) as total_withdrawal,
+SUM (CASE WHEN txn_type = 'purchase' THEN txn_amount END ) as total_purchase
+FROM customer_transactions 
+GROUP BY customer_id ,txn_date 
 ),
 
-withdrawal AS(
-SELECT customer_id,
-(date_trunc('month',txn_date) + INTERVAL '1 month - 1 day' ) :: DATE as end_of_month,
-SUM(txn_amount) as total_withdrawal FROM customer_transactions
-WHERE txn_type='withdrawal'
-GROUP BY customer_id ,txn_date
-),
+--(date_trunc('month',txn_date) + INTERVAL '1 month - 1 day ' ) :: DATE as end_of_month ,
 
-purchase AS(
-SELECT customer_id,
-(date_trunc('month',txn_date) + INTERVAL '1 month - 1 day' ) :: DATE as end_of_month,
-SUM(txn_amount) as total_purchase FROM customer_transactions
-WHERE txn_type='purchase'
-GROUP BY customer_id ,txn_date
-),
+customer_amounts_2 AS
+(
+SELECT customer_id,txn_date,
+CASE WHEN total_deposit IS NULL THEN 0 ELSE total_deposit END  as total_deposit,  
+CASE WHEN total_purchase IS NULL THEN 0 ELSE total_purchase END  as total_purchase,
+CASE WHEN total_withdrawal IS NULL THEN 0 ELSE total_withdrawal END  as total_withdrawal
+FROM customer_amounts
+)
 
-customer_accounting_details AS (
-SELECT d.customer_id,d.end_of_month,total_deposit,
-CASE WHEN  total_withdrawal IS NULL THEN 0 ELSE total_withdrawal END AS total_withdrawal,
-CASE WHEN  total_purchase IS NULL THEN 0 ELSE total_purchase END AS total_purchase
-FROM deposit d
-LEFT JOIN  withdrawal w ON
-d.customer_id = w.customer_id
-LEFT JOIN  purchase p ON
-d.customer_id=p.customer_id
-  )
-
-SELECT customer_id,end_of_month , SUM(total_deposit) - SUM(total_withdrawal)-SUM(total_purchase) AS closing_balance FROM
-customer_accounting_details
-WHERE customer_id=1
-GROUP BY customer_id,end_of_month
+SELECT customer_id, (date_trunc('month',txn_date) + INTERVAL '1 month - 1 day ' ) :: DATE as end_of_month, SUM(total_deposit-total_purchase-total_withdrawal) AS closing_balance
+FROM customer_amounts_2
+WHERE customer_id IN ( 1,2,3)
+GROUP BY customer_id,(date_trunc('month',txn_date) + INTERVAL '1 month - 1 day ' ) :: DATE 
+ORDER BY customer_id
 ```
