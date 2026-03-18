@@ -85,3 +85,9 @@ WHERE customer_id =429 AND row_num=1
 ```
 <img width="1660" height="304" alt="image" src="https://github.com/user-attachments/assets/ea75ea0d-75e3-4b1e-bcb4-f1b3731c87ff" />
 
+---
+
+**Question 5:** What is the percentage of customers who increase their closing balance by more than 5%?
+
+```sql
+```
