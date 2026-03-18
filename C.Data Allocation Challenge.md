@@ -42,3 +42,7 @@ FROM running_total WHERE row_num =1
 ORDER BY customer_id,txn_month
 
 ```
+
+<img width="1645" height="882" alt="image" src="https://github.com/user-attachments/assets/6702305c-50ec-48c2-97ce-7bf7b0492bc1" />
+
+---
