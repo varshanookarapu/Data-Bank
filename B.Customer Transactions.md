@@ -140,3 +140,4 @@ SELECT (COUNT(DISTINCT customer_id) :: NUMERIC/ (SELECT COUNT(distinct customer_
 AS percentageofcustomers FROM cbpg WHERE percentage_change > 5 
 
 ```
+<img width="439" height="166" alt="image" src="https://github.com/user-attachments/assets/efc8c45d-0c60-4a64-9dcc-c4f942362486" />
