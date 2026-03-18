@@ -2,6 +2,8 @@
 
 https://8weeksqlchallenge.com/case-study-4/
 
+**Takeaway :**  Window Functions( Row number , lag ) , Running Totals , End of Month Balances , Min ,Max , Avg balances 
+
 ## A. Customer Nodes Exploration
 
 
