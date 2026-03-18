@@ -14,7 +14,7 @@ GROUP BY customer_id,txn_date
 running_total AS
 (
  SELECT * , 
- SUM(balance) OVER(PARTITION BY customer_id,txn_month ORDER BY txn_date) :: NUMERIC AS running_balance,
+ SUM(balance) OVER(PARTITION BY customer_id ORDER BY txn_date) :: NUMERIC AS running_balance,
  ROW_NUMBER() OVER(PARTITION BY customer_id,txn_month ORDER BY txn_date DESC) as row_num
  FROM balance 
 )  
