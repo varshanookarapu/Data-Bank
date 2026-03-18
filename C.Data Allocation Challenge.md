@@ -35,21 +35,67 @@ ORDER BY month
 
 ## Option 2: data is allocated on the average amount of money kept in the account in the previous 30 days
 
-```sql
+In this question we will have to check the day by day data for every customer  since they are asking us to check the avg amount of money kept in account for previous 30 days , which means we need daily snapshot of the blances
 
+```sql
+WITH running_balance AS (
+    SELECT
+        customer_id,
+        txn_date,
+        SUM(CASE WHEN txn_type='deposit' THEN txn_amount ELSE -txn_amount END) 
+            OVER (PARTITION BY customer_id ORDER BY txn_date) AS running_balance
+    FROM customer_transactions
+),
+
+
+daily_snapshot AS (
+    SELECT
+        customer_id,
+        txn_date,
+        MAX(running_balance) AS end_of_day_balance
+    FROM running_balance
+    GROUP BY customer_id, txn_date
+    ORDER BY customer_id ,txn_date
+)
+
+
+SELECT EXTRACT ('month' FROM txn_date) AS month, COUNT(*) as rows_required
+FROM daily_snapshot
+GROUP BY EXTRACT ('month' FROM txn_date)
+ORDER BY EXTRACT ('month' FROM txn_date)
 ```
+
+<img width="1024" height="318" alt="image" src="https://github.com/user-attachments/assets/a4d8e2b7-ada5-481f-9231-90c5921ccef7" />
+
 ---
 
 ## Option 3: data is updated real-time
 
-```sql
+here we are counting every transaction for every customer
 
+```sql
+WITH running_balance AS (
+    SELECT
+        customer_id,
+        txn_date,
+        SUM(CASE WHEN txn_type='deposit' THEN txn_amount ELSE -txn_amount END) 
+            OVER (PARTITION BY customer_id ORDER BY txn_date) AS running_balance
+    FROM customer_transactions
+)
+
+
+
+SELECT EXTRACT ('month' FROM txn_date) AS month, COUNT(*) as rows_required
+FROM running_balance
+GROUP BY EXTRACT ('month' FROM txn_date)
+ORDER BY EXTRACT ('month' FROM txn_date)
 ```
 ---
 
+<img width="863" height="345" alt="image" src="https://github.com/user-attachments/assets/76bc2501-84d7-4333-926b-9dc345cc296b" />
 
 
-
+---
 
 
 ## running customer balance column that includes the impact each transaction
