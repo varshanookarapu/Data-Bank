@@ -57,19 +57,31 @@ ORDER BY month
 ```sql
 WITH customer_amounts AS
 (
-SELECT customer_id, txn_date,   
-SUM (CASE WHEN txn_type = 'deposit' THEN txn_amount ELSE 0 END ) as total_deposit,
-SUM (CASE WHEN txn_type = 'withdrawal' THEN txn_amount ELSE 0 END ) as total_withdrawal,
-SUM (CASE WHEN txn_type = 'purchase' THEN txn_amount ELSE 0 END ) as total_purchase
+SELECT customer_id, txn_date, EXTRACT ('month'FROM txn_date)    AS txn_month,
+SUM ((CASE WHEN txn_type = 'deposit' THEN txn_amount ELSE 0 END ) - (CASE WHEN txn_type <> 'deposit' THEN txn_amount ELSE 0 END )) as balance
 FROM customer_transactions 
-GROUP BY customer_id ,txn_date 
+GROUP BY customer_id ,txn_date ,EXTRACT ('month'FROM txn_date)
+),
+
+balance AS
+(
+SELECT 
+  customer_id,
+  txn_date,
+  txn_month,
+  balance,
+  SUM(balance) OVER(PARTITION BY customer_id ORDER BY txn_date) AS running_sum,
+  ROW_NUMBER() OVER(PARTITION BY customer_id,txn_month  ORDER BY txn_date DESC) AS row_num
+FROM customer_amounts 
+  
 )
 
-SELECT customer_id, (date_trunc('month',txn_date) + INTERVAL '1 month - 1 day ' ) :: DATE as end_of_month, SUM(total_deposit-total_purchase-total_withdrawal) AS closing_balance
-FROM customer_amounts
-WHERE customer_id IN ( 1,2,3,4,5) -- added where clause to filter a few specific rows , remove the where clause to show the detials for all 500 customers
-GROUP BY customer_id,(date_trunc('month',txn_date) + INTERVAL '1 month - 1 day ' ) :: DATE 
-ORDER BY customer_id
+SELECT customer_id, (date_trunc('month',txn_date) + INTERVAL '1 month - 1 day ' ) :: DATE as end_of_month,
+txn_month,running_sum as closing_balance
+FROM balance
+WHERE customer_id =429 AND row_num=1
+
+-- remove the filter for customer_id to get values for all the other customers
 ```
-<img width="1663" height="702" alt="image" src="https://github.com/user-attachments/assets/107e077b-2f18-484a-9a4d-c6a16dc68a7b" />
+<img width="1660" height="304" alt="image" src="https://github.com/user-attachments/assets/ea75ea0d-75e3-4b1e-bcb4-f1b3731c87ff" />
 
