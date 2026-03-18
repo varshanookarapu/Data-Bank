@@ -90,4 +90,53 @@ WHERE customer_id =429 AND row_num=1
 **Question 5:** What is the percentage of customers who increase their closing balance by more than 5%?
 
 ```sql
+
+WITH customer_amounts AS
+(
+SELECT customer_id, txn_date, EXTRACT ('month'FROM txn_date)    AS txn_month,
+SUM ((CASE WHEN txn_type = 'deposit' THEN txn_amount ELSE 0 END ) - (CASE WHEN txn_type <> 'deposit' THEN txn_amount ELSE 0 END )) as balance
+FROM customer_transactions 
+GROUP BY customer_id ,txn_date ,EXTRACT ('month'FROM txn_date)
+),
+
+balance AS
+(
+SELECT 
+  customer_id,
+  txn_date,
+  txn_month,
+  balance,
+  SUM(balance) OVER(PARTITION BY customer_id ORDER BY txn_date) AS running_sum,
+  ROW_NUMBER() OVER(PARTITION BY customer_id,txn_month  ORDER BY txn_date DESC) AS row_num
+FROM customer_amounts 
+  
+),
+
+-- From this CTE we are calculating the closing blances for every month for each customer
+running_sum AS 
+(
+SELECT customer_id, (date_trunc('month',txn_date) + INTERVAL '1 month - 1 day ' ) :: DATE as end_of_month,
+txn_month,running_sum as closing_balance,
+LAG(running_sum) OVER(PARTITION BY customer_id ORDER BY txn_month) AS previous_month_balance
+FROM balance
+WHERE row_num=1
+),
+
+-- From this CTE we are calculating the percentage change between current months closing balance and previous months closing balance
+cbpg AS(
+  
+SELECT customer_id,txn_month,closing_balance,previous_month_balance, 
+ CASE WHEN previous_month_balance IS NULL OR previous_month_balance = 0 THEN NULL 
+ELSE ROUND(((closing_balance - previous_month_balance ) / previous_month_balance ) * 100 , 2) END  AS percentage_change
+FROM running_sum 
+  )
+  
+ -- SELECT COUNT(DISTINCT customer_id) FROM cbpg
+ -- WHERE percentage_change > 5 AND previous_month_balance > 0 
+
+-- Here we  are filerting all the  customers whose percentage change is greater than 5 and calculating the percentage of customers
+
+SELECT (COUNT(DISTINCT customer_id) :: NUMERIC/ (SELECT COUNT(distinct customer_id) FROM customer_transactions) :: NUMERIC) * 100
+AS percentageofcustomers FROM cbpg WHERE percentage_change > 5 
+
 ```
