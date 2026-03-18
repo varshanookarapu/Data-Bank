@@ -94,7 +94,7 @@ node_id != next_node_id and next_node_id IS NOT NULL
 
 ---
 
-## SQL Code - WIP
+## SQL Code 
 
 ```sql
 
@@ -130,6 +130,7 @@ GROUP BY region_name
 ORDER BY region_name;
 
 ```
+<img width="1629" height="341" alt="image" src="https://github.com/user-attachments/assets/40031409-985e-4fa2-9ed7-29b05f3620ae" />
 
 ---
 
