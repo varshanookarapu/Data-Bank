@@ -1,4 +1,15 @@
 
+## running customer balance column that includes the impact each transaction
+
+
+```sql
+SELECT customer_id,txn_type,txn_date, txn_amount ,
+SUM
+(CASE WHEN txn_type = 'deposit' THEN txn_amount ELSE -txn_amount END ) 
+OVER ( PARTITION BY customer_id ORDER BY txn_date ) 
+AS running_balance FROM customer_transactions
+ORDER BY customer_id, txn_date
+```
 
 ## customer balance at the end of each month
 ```sql
