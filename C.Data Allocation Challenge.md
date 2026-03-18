@@ -1,4 +1,55 @@
 
+## Option 1: data is allocated based off the amount of money at the end of the previous month
+
+```sql
+WITH running_balance AS (
+    SELECT
+        customer_id,
+        txn_date,
+        SUM(CASE WHEN txn_type='deposit' THEN txn_amount ELSE -txn_amount END) 
+            OVER (PARTITION BY customer_id ORDER BY txn_date) AS balance
+    FROM customer_transactions
+),
+month_end AS (
+    SELECT
+        customer_id,
+        EXTRACT ('month' FROM txn_date) AS month,
+        MAX(balance) AS end_of_month_balance
+    FROM running_balance
+    GROUP BY customer_id, EXTRACT ('month' FROM txn_date)
+    ORDER BY customer_id ,EXTRACT ('month' FROM txn_date)
+)
+
+
+SELECT month, COUNT(*) as rows_required
+FROM month_end
+GROUP BY month
+ORDER BY month
+```
+
+<img width="1149" height="333" alt="image" src="https://github.com/user-attachments/assets/025c5a99-a21d-46d6-9fca-8119a9aeda54" />
+
+---
+
+## Option 2: data is allocated on the average amount of money kept in the account in the previous 30 days
+
+```sql
+
+```
+---
+
+## Option 3: data is updated real-time
+
+```sql
+
+```
+---
+
+
+
+
+
+
 ## running customer balance column that includes the impact each transaction
 
 
