@@ -1,6 +1,8 @@
 
 ## Option 1: data is allocated based off the amount of money at the end of the previous month
 
+Basically the question is aksing us how much data is needed  to check the end of month  balance for every customer  i.e  one row for every customer for every month , we get the end of month balance , then we count the rows  for every month which gives the data that is needed 
+
 ```sql
 WITH running_balance AS (
     SELECT
